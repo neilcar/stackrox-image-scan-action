@@ -1,0 +1,1 @@
+# stackrox-image-scan-action
