@@ -1,0 +1,38 @@
+name: 'Image Scan'
+description: 'Scan image with StackRox'
+inputs:
+  central-endpoint:
+    description: 'Location of the central endpoint in the format stackrox.contoso.com:443'
+    required: true
+  api-token:
+    description: 'API token with CI permissions'
+    required: true
+  image:
+    description: 'Full name of the image to scan -- gcr.io/stackrox/testimage:5.1'
+outputs:
+  scan-json:
+    description: 'Raw scan JSON'
+    value: ${{ steps.image-scan.outputs.scan-json }}
+  layers-csv:
+    description: 'Layers CSV'
+    value: ${{ steps.jq-csv.outputs.layers-csv }}
+  policy-txt:
+    description: 'roxctl image check output'
+    value: ${{ steps.image-check.outputs.policy-txt }}
+runs:
+  using: "composite"
+  steps:
+    - run:  curl -k -L -H "Authorization: Bearer ${{ inputs.api-token }}" https://${{ inputs.central-endpoint }}/api/cli/download/roxctl-linux --output ./roxctl
+      shell: bash
+    - run: chmod +x ./roxctl
+      shell: bash
+    - run: echo "::set-output name=scan-json::$(./roxctl image scan -e ${{ inputs.central-endpoint }} --image ${{ inputs.image }})
+      id: image-scan
+      env:
+        ROX_API_TOKEN: ${{ inputs.api-token }}
+      shell: bash
+    - run: echo "::set-output name=policy-txt::$(./roxctl image check -e ${{ inputs.central-endpoint }} --image ${{ inputs.image }})
+      id: image-check
+      env:
+        ROX_API_TOKEN: ${{ inputs.api-token }}
+      shell: bash
