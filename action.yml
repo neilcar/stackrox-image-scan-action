@@ -22,7 +22,8 @@ outputs:
 runs:
   using: "composite"
   steps:
-    - run:  curl -k -L -H "Authorization: Bearer ${{ inputs.api-token }}" https://${{ inputs.central-endpoint }}/api/cli/download/roxctl-linux --output ./roxctl
+    - run: >
+        curl -k -L -H "Authorization: Bearer ${{ inputs.api-token }}" https://${{ inputs.central-endpoint }}/api/cli/download/roxctl-linux --output ./roxctl
       shell: bash
     - run: chmod +x ./roxctl
       shell: bash
