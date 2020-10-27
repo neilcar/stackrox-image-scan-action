@@ -27,12 +27,12 @@ runs:
       shell: bash
     - run: chmod +x ./roxctl
       shell: bash
-    - run: echo "::set-output name=scan-json::$(./roxctl image scan -e ${{ inputs.central-endpoint }} --image ${{ inputs.image }})"
+    - run: echo "##[set-output name=scan-json;]$(./roxctl image scan -e ${{ inputs.central-endpoint }} --image ${{ inputs.image }})"
       id: image-scan
       env:
         ROX_API_TOKEN: ${{ inputs.api-token }}
       shell: bash
-    - run: echo "::set-output name=policy-txt::$(./roxctl image check -e ${{ inputs.central-endpoint }} --image ${{ inputs.image }})"
+    - run: echo "##[set-output name=policy-txt;]::$(./roxctl image check -e ${{ inputs.central-endpoint }} --image ${{ inputs.image }})"
       id: image-check
       env:
         ROX_API_TOKEN: ${{ inputs.api-token }}
