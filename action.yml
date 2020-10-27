@@ -2,7 +2,7 @@ name: 'Image Scan'
 description: 'Scan image with StackRox'
 inputs:
   central-endpoint:
-    description: 'Location of the central endpoint in the format stackrox.contoso.com:443'
+    description: 'Central endpoint in the format stackrox.contoso.com:443'
     required: true
   api-token:
     description: 'API token with CI permissions'
