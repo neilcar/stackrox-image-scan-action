@@ -9,6 +9,7 @@ inputs:
     required: true
   image:
     description: 'Full name of the image to scan -- gcr.io/stackrox/testimage:5.1'
+    required: true
 outputs:
   scan-json:
     description: 'Raw scan JSON'
@@ -22,18 +23,19 @@ outputs:
 runs:
   using: "composite"
   steps:
-    - run: >
+    - run: |
         curl -k -L -H "Authorization: Bearer ${{ inputs.api-token }}" https://${{ inputs.central-endpoint }}/api/cli/download/roxctl-linux --output ./roxctl
+        chmod +x ./roxctl
       shell: bash
-    - run: chmod +x ./roxctl
-      shell: bash
-    - run: echo "##[set-output name=scan-json;]$(./roxctl image scan -e ${{ inputs.central-endpoint }} --image ${{ inputs.image }})"
+    - run: echo "./roxctl image scan -e ${{ inputs.central-endpoint }} --image ${{ inputs.image }} > ./image-scan.json"
       id: image-scan
       env:
         ROX_API_TOKEN: ${{ inputs.api-token }}
       shell: bash
-    - run: echo "##[set-output name=policy-txt;]::$(./roxctl image check -e ${{ inputs.central-endpoint }} --image ${{ inputs.image }})"
+    - run: echo "./roxctl image check -e ${{ inputs.central-endpoint }} --image ${{ inputs.image }} > ./image-check.txt"
       id: image-check
       env:
         ROX_API_TOKEN: ${{ inputs.api-token }}
+      shell: bash
+    - run: jq --help
       shell: bash
