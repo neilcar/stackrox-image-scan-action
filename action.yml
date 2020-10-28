@@ -37,5 +37,15 @@ runs:
       env:
         ROX_API_TOKEN: ${{ inputs.api-token }}
       shell: bash
+    - name: Upload scan artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: image-scan.json
+        path: ./image-scan.json
+    - name: Upload check artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: image-check.txt
+        path: ./image-check.txt
     - run: jq --help
       shell: bash
