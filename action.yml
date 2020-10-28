@@ -1,4 +1,4 @@
-name: 'Image Scan'
+name: 'Image-Scan'
 description: 'Scan image with StackRox'
 inputs:
   central-endpoint:
@@ -13,13 +13,10 @@ inputs:
 outputs:
   scan-json:
     description: 'Raw scan JSON'
-    value: ${{ steps.image-scan.outputs.scan-json }}
-  layers-csv:
-    description: 'Layers CSV'
-    value: ${{ steps.jq-csv.outputs.layers-csv }}
+    value: ${{ steps.scan-info.outputs.scan-info }}
   policy-txt:
     description: 'roxctl image check output'
-    value: ${{ steps.image-check.outputs.policy-txt }}
+    value: ${{ steps.scan-check.outputs.scan-check }}
 runs:
   using: "composite"
   steps:
@@ -27,25 +24,25 @@ runs:
         curl -k -L -H "Authorization: Bearer ${{ inputs.api-token }}" https://${{ inputs.central-endpoint }}/api/cli/download/roxctl-linux --output ./roxctl
         chmod +x ./roxctl
       shell: bash
-    - run: echo "./roxctl image scan -e ${{ inputs.central-endpoint }} --image ${{ inputs.image }} > ./image-scan.json"
-      id: image-scan
+    - id: scan-info
+      run: |
+        output="$(./roxctl image scan -e ${{ inputs.central-endpoint }} --image ${{ inputs.image }})" || true
+        output="${output//'%'/'%25'}"
+        output="${output//$'\n'/'%0A'}"
+        output="${output//$'\r'/'%0D'}"
+        output="${output//$'\''/'\"'}"
+        echo ::set-output name=scan-info::"$output"
       env:
         ROX_API_TOKEN: ${{ inputs.api-token }}
       shell: bash
-    - run: echo "./roxctl image check -e ${{ inputs.central-endpoint }} --image ${{ inputs.image }} > ./image-check.txt"
-      id: image-check
+    - id: scan-check
+      run: |
+        output="$(./roxctl image check -e ${{ inputs.central-endpoint }} --image ${{ inputs.image }} --json)" || true
+        output="${output//'%'/'%25'}"
+        output="${output//$'\n'/'%0A'}"
+        output="${output//$'\r'/'%0D'}"
+        output="${output//$'\''/'\"'}"
+        echo ::set-output name=scan-check::"$output"
       env:
         ROX_API_TOKEN: ${{ inputs.api-token }}
-      shell: bash
-    - name: Upload scan artifact
-      uses: actions/upload-artifact@v2
-      with:
-        name: image-scan.json
-        path: ./image-scan.json
-    - name: Upload check artifact
-      uses: actions/upload-artifact@v2
-      with:
-        name: image-check.txt
-        path: ./image-check.txt
-    - run: jq --help
       shell: bash
